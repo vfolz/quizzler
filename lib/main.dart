@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'quizz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 void main() => runApp(Quizzler());
 
 class Quizzler extends StatelessWidget {
@@ -26,9 +27,49 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper =[];
-  int questionNumber = 0 ;
-
   QuizBrain qz = QuizBrain();
+
+  void checkAnswer(bool currentAnswer ){
+
+    setState(() {
+      if(qz.getQuestionAnswer() != currentAnswer){
+        scoreKeeper.add(Icon(
+          Icons.close,
+          color: Colors.red,));
+      }else{
+        scoreKeeper.add(Icon(
+          Icons.check,
+          color: Colors.green,));
+      }
+
+      if(qz.isFinished()){
+        qz.resetQuiz();
+        scoreKeeper.clear();
+        Alert(context: context,
+            title: "Quiz Finished",
+            desc: "You have reached the end of the Quiz",
+          buttons: [
+          DialogButton(
+          child: Text(
+          "Reset",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+      onPressed: () => Navigator.pop(context),
+      width: 120,
+      )
+      ],
+
+
+
+
+        ).show();
+      }else{
+        qz.nextQuestion();
+
+      }
+    });
+
+  }
 
 
   @override
@@ -67,15 +108,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-
-                bool correctAnswer = qz.getQuestionAnswer();
-
-                setState(() {
-                  qz.nextQuestion();
-
-                });
-
-                //The user picked true.
+                checkAnswer(true);
               },
             ),
           ),
@@ -93,38 +126,17 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-
-                bool correctAnswer = qz.getQuestionAnswer(questionNumber);
-
-                setState(() {
-                  qz.nextQuestion();
-                });
+                checkAnswer(false);
               },
             ),
           ),
         ),
         Row(
-          children: <Widget>[
-            Icon(
-
-              Icons.check,
-              color: Colors.green,
-
-            ),
-            Icon(
-              Icons.close,
-              color: Colors.red,
-            )
-          ],
+          children:
+             scoreKeeper,
         )
         //TODO: Add a Row here as your score keeper
       ],
     );
   }
 }
-
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
